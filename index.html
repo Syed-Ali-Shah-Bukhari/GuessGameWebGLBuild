@@ -45,65 +45,62 @@
 <body>
 	<div id="gameContainer">
 		<canvas id="unity-canvas" width="1920" height="1080" data-pixel-art="true"></canvas>
-		<script src="Build/Guess V(0.4).loader.js"></script>
+		<script src="Build/Guess V(0.5).loader.js"></script>
 		<script>
 			var canvas = document.querySelector("#unity-canvas");
 			var config = {
-				dataUrl: "Build/Guess V(0.4).data.unityweb",
-				frameworkUrl: "Build/Guess V(0.4).framework.js.unityweb",
-				codeUrl: "Build/Guess V(0.4).wasm.unityweb",
+				dataUrl: "Build/Guess V(0.5).data.unityweb",
+				frameworkUrl: "Build/Guess V(0.5).framework.js.unityweb",
+				codeUrl: "Build/Guess V(0.5).wasm.unityweb",
 				streamingAssetsUrl: "StreamingAssets",
 				companyName: "Creative Studios",
 				productName: "Guessing Multiplayer Game",
 				productVersion: "0.1.0",
 				autoSyncPersistentDataPath: true,
 			};
-			var scaleToFit;
-			try {
-				scaleToFit = !!JSON.parse("false");
-			} catch (e) {
-				scaleToFit = true;
+
+			function isMobile() {
+				return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 			}
-			function progressHandler(progress) {
-				var percent = progress * 100 + '%';
-				canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
-				canvas.style.backgroundSize = '100% 1rem';
-			}
+
 			function onResize() {
 				var container = canvas.parentElement;
-				var w;
-				var h;
+				let w = window.innerWidth;
+				let h = window.innerHeight;
 
-				if (scaleToFit) {
-					w = window.innerWidth;
-					h = window.innerHeight;
-
-					var r = 1080 / 1920;
-
-					if (w * r > window.innerHeight) {
-						w = Math.min(w, Math.ceil(h / r));
+				if (isMobile()) {
+					// Force portrait full screen
+					if (h < w) {
+						[w, h] = [h, w];
 					}
-					h = Math.floor(w * r);
 				} else {
-					w = 1920;
-					h = 1080;
+					// Force landscape full screen
+					if (w < h) {
+						[w, h] = [h, w];
+					}
 				}
 
 				container.style.width = canvas.style.width = w + "px";
 				container.style.height = canvas.style.height = h + "px";
 				container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
 				container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
-				window.focus();
 			}
+
+			function progressHandler(progress) {
+				var percent = progress * 100 + '%';
+				canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
+				canvas.style.backgroundSize = '100% 1rem';
+			}
+
 			createUnityInstance(canvas, config, progressHandler).then(function (instance) {
 				canvas = instance.Module.canvas;
 				onResize();
 			});
+
 			window.addEventListener('resize', onResize);
 			onResize();
 
-			if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-				// Mobile device style: fill the whole browser client area with the game canvas:
+			if (isMobile()) {
 				const meta = document.createElement('meta');
 				meta.name = 'viewport';
 				meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';

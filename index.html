@@ -2,112 +2,95 @@
 <html lang="en-us">
 
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Guessing Multiplayer Game</title>
-	<style>
-		html,
-		body {
-			background: #232323;
-			width: 100%;
-			height: 100%;
-			overflow: visible;
-			padding: 0;
-			margin: 0;
-		}
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Guessing Multiplayer Game</title>
+    <style>
+        html,
+        body {
+            background: #232323;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            padding: 0;
+            margin: 0;
+        }
 
-		div#gameContainer {
-			background: transparent !important;
-			position: absolute;
-		}
+        div#gameContainer {
+            background: transparent !important;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
 
-		div#gameContainer canvas {
-			position: absolute;
-			-webkit-user-select: none;
-			user-select: none;
-		}
+        div#gameContainer canvas {
+            position: absolute;
+            -webkit-user-select: none;
+            user-select: none;
+            width: 100%;
+            height: 100%;
+        }
 
-		div#gameContainer canvas[data-pixel-art="true"] {
-			position: absolute;
-			image-rendering: optimizeSpeed;
-			image-rendering: -webkit-crisp-edges;
-			image-rendering: -moz-crisp-edges;
-			image-rendering: -o-crisp-edges;
-			image-rendering: crisp-edges;
-			image-rendering: -webkit-optimize-contrast;
-			image-rendering: optimize-contrast;
-			image-rendering: pixelated;
-			-ms-interpolation-mode: nearest-neighbor;
-		}
-	</style>
+        div#gameContainer canvas[data-pixel-art="true"] {
+            position: absolute;
+            image-rendering: optimizeSpeed;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimize-contrast;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+    </style>
 </head>
 
 <body>
-	<div id="gameContainer">
-		<canvas id="unity-canvas" width="1920" height="1080" data-pixel-art="true"></canvas>
-		<script src="Build/Guess V(1.3).loader.js"></script>
-		<script>
-			var canvas = document.querySelector("#unity-canvas");
-			var config = {
-				dataUrl: "Build/Guess V(1.3).data.unityweb",
-				frameworkUrl: "Build/Guess V(1.3).framework.js.unityweb",
-				codeUrl: "Build/Guess V(1.3).wasm.unityweb",
-				streamingAssetsUrl: "StreamingAssets",
-				companyName: "Creative Studios",
-				productName: "Guessing Multiplayer Game",
-				productVersion: "0.1.0",
-				autoSyncPersistentDataPath: true,
-			};
+    <div id="gameContainer">
+        <canvas id="unity-canvas" width="1920" height="1080" data-pixel-art="true"></canvas>
+        <script src="Build/Guess V(1.4).loader.js"></script>
+        <script>
+            var canvas = document.querySelector("#unity-canvas");
+            var config = {
+                dataUrl: "Build/Guess V(1.4).data.unityweb",
+                frameworkUrl: "Build/Guess V(1.4).framework.js.unityweb",
+                codeUrl: "Build/Guess V(1.4).wasm.unityweb",
+                streamingAssetsUrl: "StreamingAssets",
+                companyName: "Creative Studios",
+                productName: "Guessing Multiplayer Game",
+                productVersion: "0.1.0",
+                autoSyncPersistentDataPath: true,
+            };
 
-			function isMobile() {
-				return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-			}
+            function onResize() {
+                var container = canvas.parentElement;
+                var w = window.innerWidth;
+                var h = window.innerHeight;
 
-			function onResize() {
-				var container = canvas.parentElement;
-				let w = window.innerWidth;
-				let h = window.innerHeight;
+                container.style.width = w + "px";
+                container.style.height = h + "px";
+                canvas.style.width = w + "px";
+                canvas.style.height = h + "px";
+            }
 
-				if (isMobile()) {
-					// Force portrait full screen
-					if (h < w) {
-						[w, h] = [h, w];
-					}
-				} else {
-					// Force landscape full screen
-					if (w < h) {
-						[w, h] = [h, w];
-					}
-				}
+            function progressHandler(progress) {
+                var percent = progress * 100 + '%';
+                canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
+                canvas.style.backgroundSize = '100% 1rem';
+            }
 
-				container.style.width = canvas.style.width = w + "px";
-				container.style.height = canvas.style.height = h + "px";
-				container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
-				container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
-			}
+            createUnityInstance(canvas, config, progressHandler).then(function (instance) {
+                canvas = instance.Module.canvas;
+                onResize();
+            });
 
-			function progressHandler(progress) {
-				var percent = progress * 100 + '%';
-				canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
-				canvas.style.backgroundSize = '100% 1rem';
-			}
-
-			createUnityInstance(canvas, config, progressHandler).then(function (instance) {
-				canvas = instance.Module.canvas;
-				onResize();
-			});
-
-			window.addEventListener('resize', onResize);
-			onResize();
-
-			if (isMobile()) {
-				const meta = document.createElement('meta');
-				meta.name = 'viewport';
-				meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-				document.getElementsByTagName('head')[0].appendChild(meta);
-			}
-		</script>
-	</div>
+            window.addEventListener('resize', onResize);
+            onResize();
+        </script>
+    </div>
 </body>
 
 </html>
